@@ -1,0 +1,33 @@
+name: tests
+on:
+  push:
+
+jobs:
+  test:
+    timeout-minutes: 2
+    runs-on: ubuntu-latest
+    name: test
+    steps:
+      - name: setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17.x
+      - name: checkout razorpay
+        uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          # In order:
+          # * Module download cache
+          # * Build cache (Linux)
+          # * Build cache (Mac)
+          # * Build cache (Windows)
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+            ~/Library/Caches/go-build
+            %LocalAppData%\go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: test
+        run: make test
