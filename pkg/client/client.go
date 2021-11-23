@@ -5,12 +5,12 @@ import (
 	"net/http"
 
 	"github.com/gamezop/razorpay-go/pkg/requestor"
-	rC "github.com/gamezop/razorpay-go/pkg/resource/contact"
+	r "github.com/gamezop/razorpay-go/pkg/resource"
 	"github.com/go-playground/validator/v10"
 )
 
 type IRazorPayClient interface {
-	CreateContact(ctx context.Context, contact rC.RequestCreateContact) (rC.Contact, error)
+	CreateContact(ctx context.Context, contact r.RequestCreateContact) (r.Contact, error)
 	// CreateFundingAccount(ctx,)
 }
 
@@ -25,15 +25,15 @@ func init() {
 	validate = validator.New()
 }
 
-func (r *razorPayClient) CreateContact(ctx context.Context, contact rC.RequestCreateContact) (rC.Contact, error) {
+func (rzp *razorPayClient) CreateContact(ctx context.Context, contact r.RequestCreateContact) (r.Contact, error) {
 	err := validate.Struct(contact)
 	if err != nil {
-		return rC.Contact{}, err
+		return r.Contact{}, err
 	}
 	api := requestor.API_CONTACT_CREATE
 
-	var createdContact rC.Contact
-	err = r.clientHelper.Do(r.httpClient, api, contact, &createdContact)
+	var createdContact r.Contact
+	err = rzp.clientHelper.Do(rzp.httpClient, api, contact, &createdContact)
 	return createdContact, err
 }
 
