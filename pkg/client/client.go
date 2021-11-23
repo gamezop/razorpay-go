@@ -11,6 +11,11 @@ import (
 
 type IRazorPayClient interface {
 	CreateContact(ctx context.Context, contact r.RequestCreateContact) (r.Contact, error)
+	CreateFundingAccountUPI(ctx context.Context, faUPI r.RequestFundingAccountUPI) (
+		r.FundingAccountUPI,
+		error,
+	)
+	Payout(ctx context.Context, faUPI r.RequestPayout) (r.Payout, error)
 	// CreateFundingAccount(ctx,)
 }
 
@@ -35,6 +40,36 @@ func (rzp *razorPayClient) CreateContact(ctx context.Context, contact r.RequestC
 	var createdContact r.Contact
 	err = rzp.clientHelper.Do(rzp.httpClient, api, contact, &createdContact)
 	return createdContact, err
+}
+
+func (rzp *razorPayClient) CreateFundingAccountUPI(ctx context.Context, faUPI r.RequestFundingAccountUPI) (
+	r.FundingAccountUPI,
+	error,
+) {
+	err := validate.Struct(faUPI)
+	if err != nil {
+		return r.FundingAccountUPI{}, err
+	}
+	api := requestor.API_FUNDING_ACCOUNT_CREATE
+
+	var createdFundingAccountUPI r.FundingAccountUPI
+	err = rzp.clientHelper.Do(rzp.httpClient, api, faUPI, &createdFundingAccountUPI)
+	return createdFundingAccountUPI, err
+}
+
+func (rzp *razorPayClient) Payout(ctx context.Context, faUPI r.RequestPayout) (
+	r.Payout,
+	error,
+) {
+	err := validate.Struct(faUPI)
+	if err != nil {
+		return r.Payout{}, err
+	}
+	api := requestor.API_PAYOUT_CREATE
+
+	var createdFundingAccountUPI r.Payout
+	err = rzp.clientHelper.Do(rzp.httpClient, api, faUPI, &createdFundingAccountUPI)
+	return createdFundingAccountUPI, err
 }
 
 // please don't use default httpClient

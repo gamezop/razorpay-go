@@ -12,9 +12,12 @@ import (
 type API string
 
 var (
-	API_CONTACT_CREATE API = "API_CONTACT_CREATE"
+	API_CONTACT_CREATE         API = "API_CONTACT_CREATE"
+	API_FUNDING_ACCOUNT_CREATE API = "API_FUNDING_ACCOUNT_CREATE"
+	API_PAYOUT_CREATE          API = "API_PAYOUT_CREATE"
 )
 
+// this can be generic sdk builder
 type IRazorPayHttpClientHelper interface {
 	GetMethod(api API) string
 	GetPath(api API, urlParams []string) string
@@ -74,6 +77,10 @@ func (r *razorPayHttpClientHelper) GetMethod(api API) string {
 	switch api {
 	case API_CONTACT_CREATE:
 		return "POST"
+	case API_FUNDING_ACCOUNT_CREATE:
+		return "POST"
+	case API_PAYOUT_CREATE:
+		return "POST"
 	default:
 		panic(fmt.Sprintf("unknown path %s", api))
 	}
@@ -91,6 +98,10 @@ func (r *razorPayHttpClientHelper) getPath(api API, urlParams []string) string {
 	switch api {
 	case API_CONTACT_CREATE:
 		return "/contacts"
+	case API_FUNDING_ACCOUNT_CREATE:
+		return "/fund_accounts"
+	case API_PAYOUT_CREATE:
+		return "/payouts"
 	default:
 		panic(fmt.Sprintf("unknown path %s", api))
 	}
