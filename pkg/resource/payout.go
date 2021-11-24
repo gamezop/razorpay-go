@@ -6,6 +6,10 @@ const (
 	PAYOUT_MODE_UPI PAYOUT_MODE = "UPI"
 )
 
+var ALL_PAYOUTS = []string{
+	string(PAYOUT_MODE_UPI),
+}
+
 type PURPOSE string
 
 const (

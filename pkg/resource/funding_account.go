@@ -7,6 +7,11 @@ const (
 	FA_BANK FundingAccountType = "bank_account"
 )
 
+var ALL_FA = []string{
+	string(FA_UPI),
+	string(FA_BANK),
+}
+
 type RequestFundingAccount struct {
 	AccountType string `json:"account_type" validate:"required"`
 	ContactID   string `json:"contact_id" validate:"required"`

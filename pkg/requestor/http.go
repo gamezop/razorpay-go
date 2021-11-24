@@ -24,6 +24,11 @@ type IRazorPayHttpClientHelper interface {
 
 	AddAuth(req *http.Request)
 	Do(httpClient *http.Client, api API, reqBody interface{}, resp interface{}) error
+	DoReturnExtra(httpClient *http.Client, api API, reqBody interface{}, resp interface{}) (
+		rawResp string,
+		statusCode int,
+		err error,
+	)
 }
 
 type razorPayHttpClientHelper struct {
@@ -39,14 +44,38 @@ func New(api, secret string) IRazorPayHttpClientHelper {
 }
 
 // resp is expecting a pointer
+func (r *razorPayHttpClientHelper) DoReturnExtra(httpClient *http.Client, api API, reqBody interface{}, resp interface{}) (
+	rawResp string,
+	statusCode int,
+	err error,
+) {
+	res, err := r.doRequest(httpClient, api, reqBody)
+	if err != nil {
+		return rawResp, statusCode, err
+	}
+	rawResp, statusCode, err = ReadResponse(res, resp)
+	return rawResp, statusCode, err
+}
 func (r *razorPayHttpClientHelper) Do(httpClient *http.Client, api API, reqBody interface{}, resp interface{}) error {
-	bArr, err := json.Marshal(reqBody)
+	res, err := r.doRequest(httpClient, api, reqBody)
 	if err != nil {
 		return err
 	}
+	_, _, err = ReadResponse(res, resp)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *razorPayHttpClientHelper) doRequest(httpClient *http.Client, api API, reqBody interface{}) (*http.Response, error) {
+	bArr, err := json.Marshal(reqBody)
+	if err != nil {
+		return nil, err
+	}
 
 	log.Trace().
-		Str("api", "rzHttpClient.Do").
+		Str("api", "rzHttpClient.doRequest").
 		Str("requestBody", string(bArr)).
 		Msg("send message")
 
@@ -59,18 +88,10 @@ func (r *razorPayHttpClientHelper) Do(httpClient *http.Client, api API, reqBody 
 	httpReq.Header.Set("Content-Type", "application/json")
 	r.AddAuth(httpReq)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	res, err := httpClient.Do(httpReq)
-	if err != nil {
-		return err
-	}
-
-	err = ReadResponse(res, resp)
-	if err != nil {
-		return err
-	}
-	return nil
+	return res, err
 }
 
 func (r *razorPayHttpClientHelper) GetMethod(api API) string {
