@@ -18,7 +18,7 @@ var (
 
 // ReadResponse checks response status code and response body, and tries to unmarshal.
 // v is a pointer
-func ReadResponse(resp *http.Response, v interface{}) error {
+func ReadResponse(resp *http.Response, v interface{}) (string, int, error) {
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
 			log.Error().
@@ -30,7 +30,7 @@ func ReadResponse(resp *http.Response, v interface{}) error {
 	// Try read body
 	buff, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return fmt.Errorf("%w: %s", ErrCannotReadHttpBody, err.Error())
+		return "", -1, fmt.Errorf("%w: %s", ErrCannotReadHttpBody, err.Error())
 	}
 	log.Trace().
 		Str("api", "rzHttpClient.Do.ReadResponse").
@@ -38,10 +38,10 @@ func ReadResponse(resp *http.Response, v interface{}) error {
 		Send()
 
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
-		return fmt.Errorf("%w: status:%d body: %s", ErrNon2XXStatusCode, resp.StatusCode, string(buff))
+		return string(buff), resp.StatusCode, fmt.Errorf("%w: status:%d", ErrNon2XXStatusCode, resp.StatusCode)
 	}
 	if err := json.Unmarshal(buff, v); err != nil {
-		return fmt.Errorf("%w: %s", ErrFailedToMarshalHttpBody, err.Error())
+		return string(buff), resp.StatusCode, fmt.Errorf("%w: err:%s", ErrFailedToMarshalHttpBody, err.Error())
 	}
-	return nil
+	return string(buff), resp.StatusCode, nil
 }

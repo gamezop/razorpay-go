@@ -15,7 +15,12 @@ type IRazorPayClient interface {
 		r.FundingAccountUPI,
 		error,
 	)
-	Payout(ctx context.Context, faUPI r.RequestPayout) (r.Payout, error)
+	Payout(ctx context.Context, faUPI r.RequestPayout) (
+		result r.Payout,
+		rawResponse string,
+		statusCode int,
+		err error,
+	)
 	// CreateFundingAccount(ctx,)
 }
 
@@ -58,18 +63,19 @@ func (rzp *razorPayClient) CreateFundingAccountUPI(ctx context.Context, faUPI r.
 }
 
 func (rzp *razorPayClient) Payout(ctx context.Context, faUPI r.RequestPayout) (
-	r.Payout,
-	error,
+	result r.Payout,
+	rawResponse string,
+	statusCode int,
+	err error,
 ) {
-	err := validate.Struct(faUPI)
+	err = validate.Struct(faUPI)
 	if err != nil {
-		return r.Payout{}, err
+		return
 	}
 	api := requestor.API_PAYOUT_CREATE
 
-	var createdFundingAccountUPI r.Payout
-	err = rzp.clientHelper.Do(rzp.httpClient, api, faUPI, &createdFundingAccountUPI)
-	return createdFundingAccountUPI, err
+	rawResponse, statusCode, err = rzp.clientHelper.DoReturnExtra(rzp.httpClient, api, faUPI, &result)
+	return
 }
 
 // please don't use default httpClient
