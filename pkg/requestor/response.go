@@ -33,6 +33,7 @@ func ReadResponse(resp *http.Response, v interface{}) (string, int, error) {
 		return "", -1, fmt.Errorf("%w: %s", ErrCannotReadHttpBody, err.Error())
 	}
 	log.Trace().
+		Int("status", resp.StatusCode).
 		Str("api", "rzHttpClient.Do.ReadResponse").
 		Str("responseBody", string(buff)).
 		Send()

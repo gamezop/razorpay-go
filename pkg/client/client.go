@@ -15,13 +15,16 @@ type IRazorPayClient interface {
 		r.FundingAccountUPI,
 		error,
 	)
+	CreateFundingAccountBank(ctx context.Context, faBank r.RequestFundingAccountBank) (
+		r.FundingAccountBank,
+		error,
+	)
 	Payout(ctx context.Context, faUPI r.RequestPayout) (
 		result r.Payout,
 		rawResponse string,
 		statusCode int,
 		err error,
 	)
-	// CreateFundingAccount(ctx,)
 }
 
 type razorPayClient struct {
@@ -60,6 +63,21 @@ func (rzp *razorPayClient) CreateFundingAccountUPI(ctx context.Context, faUPI r.
 	var createdFundingAccountUPI r.FundingAccountUPI
 	err = rzp.clientHelper.Do(rzp.httpClient, api, faUPI, &createdFundingAccountUPI)
 	return createdFundingAccountUPI, err
+}
+
+func (rzp *razorPayClient) CreateFundingAccountBank(ctx context.Context, faBank r.RequestFundingAccountBank) (
+	r.FundingAccountBank,
+	error,
+) {
+	err := validate.Struct(faBank)
+	if err != nil {
+		return r.FundingAccountBank{}, err
+	}
+	api := requestor.API_FUNDING_ACCOUNT_CREATE
+
+	var createdFundingAccountBank r.FundingAccountBank
+	err = rzp.clientHelper.Do(rzp.httpClient, api, faBank, &createdFundingAccountBank)
+	return createdFundingAccountBank, err
 }
 
 func (rzp *razorPayClient) Payout(ctx context.Context, faUPI r.RequestPayout) (

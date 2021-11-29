@@ -3,12 +3,9 @@ package resource
 type PAYOUT_MODE string
 
 const (
-	PAYOUT_MODE_UPI PAYOUT_MODE = "UPI"
+	PAYOUT_MODE_UPI  PAYOUT_MODE = "UPI"
+	PAYOUT_MODE_IMPS PAYOUT_MODE = "IMPS"
 )
-
-var ALL_PAYOUTS = []string{
-	string(PAYOUT_MODE_UPI),
-}
 
 type PURPOSE string
 
