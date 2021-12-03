@@ -88,7 +88,7 @@ type FundingAccountBank struct {
 }
 
 func (f FundingAccountBank) GetIdentifierForAccount() string {
-	return f.ID
+	return f.BankAccount.AccountNumber
 }
 
 func (f FundingAccountBank) GetMode() string {

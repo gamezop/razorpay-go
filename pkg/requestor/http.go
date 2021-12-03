@@ -15,6 +15,7 @@ var (
 	API_CONTACT_CREATE         API = "API_CONTACT_CREATE"
 	API_FUNDING_ACCOUNT_CREATE API = "API_FUNDING_ACCOUNT_CREATE"
 	API_PAYOUT_CREATE          API = "API_PAYOUT_CREATE"
+	API_PAYOUT_GET             API = "API_PAYOUT_GET"
 )
 
 // this can be generic sdk builder
@@ -23,8 +24,8 @@ type IRazorPayHttpClientHelper interface {
 	GetPath(api API, urlParams []string) string
 
 	AddAuth(req *http.Request)
-	Do(httpClient *http.Client, api API, reqBody interface{}, resp interface{}) error
-	DoReturnExtra(httpClient *http.Client, api API, reqBody interface{}, resp interface{}) (
+	Do(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) error
+	DoReturnExtra(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) (
 		rawResp string,
 		statusCode int,
 		err error,
@@ -44,20 +45,20 @@ func New(api, secret string) IRazorPayHttpClientHelper {
 }
 
 // resp is expecting a pointer
-func (r *razorPayHttpClientHelper) DoReturnExtra(httpClient *http.Client, api API, reqBody interface{}, resp interface{}) (
+func (r *razorPayHttpClientHelper) DoReturnExtra(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) (
 	rawResp string,
 	statusCode int,
 	err error,
 ) {
-	res, err := r.doRequest(httpClient, api, reqBody)
+	res, err := r.doRequest(httpClient, api, urlParams, reqBody)
 	if err != nil {
 		return rawResp, statusCode, err
 	}
 	rawResp, statusCode, err = ReadResponse(res, resp)
 	return rawResp, statusCode, err
 }
-func (r *razorPayHttpClientHelper) Do(httpClient *http.Client, api API, reqBody interface{}, resp interface{}) error {
-	res, err := r.doRequest(httpClient, api, reqBody)
+func (r *razorPayHttpClientHelper) Do(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) error {
+	res, err := r.doRequest(httpClient, api, urlParams, reqBody)
 	if err != nil {
 		return err
 	}
@@ -68,7 +69,7 @@ func (r *razorPayHttpClientHelper) Do(httpClient *http.Client, api API, reqBody 
 	return nil
 }
 
-func (r *razorPayHttpClientHelper) doRequest(httpClient *http.Client, api API, reqBody interface{}) (*http.Response, error) {
+func (r *razorPayHttpClientHelper) doRequest(httpClient *http.Client, api API, urlParams []string, reqBody interface{}) (*http.Response, error) {
 	bArr, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, err
@@ -81,7 +82,7 @@ func (r *razorPayHttpClientHelper) doRequest(httpClient *http.Client, api API, r
 
 	httpReq, err := http.NewRequest(
 		r.GetMethod(api),
-		r.GetPath(api, nil),
+		r.GetPath(api, urlParams),
 		bytes.NewReader(bArr),
 	)
 	httpReq.Header.Set("User-Agent", "gzp-rzpay")
@@ -102,6 +103,8 @@ func (r *razorPayHttpClientHelper) GetMethod(api API) string {
 		return "POST"
 	case API_PAYOUT_CREATE:
 		return "POST"
+	case API_PAYOUT_GET:
+		return "GET"
 	default:
 		panic(fmt.Sprintf("unknown path %s", api))
 	}
@@ -123,6 +126,8 @@ func (r *razorPayHttpClientHelper) getPath(api API, urlParams []string) string {
 		return "/fund_accounts"
 	case API_PAYOUT_CREATE:
 		return "/payouts"
+	case API_PAYOUT_GET:
+		return fmt.Sprintf("/payouts/%s", urlParams[0])
 	default:
 		panic(fmt.Sprintf("unknown path %s", api))
 	}
