@@ -19,6 +19,14 @@ const (
 	CURRENCY_INR CURRENCY = "INR"
 )
 
+type STATUS string
+
+const (
+	STATUS_PROCESSED  STATUS = "processed"
+	STATUS_PROCESSING STATUS = "processing"
+	STATUS_REVERSED   STATUS = "reversed"
+)
+
 // for UPI
 
 type RequestPayout struct {
