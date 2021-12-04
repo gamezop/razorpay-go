@@ -2,6 +2,7 @@ package requestor
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -25,7 +26,13 @@ type IRazorPayHttpClientHelper interface {
 
 	AddAuth(req *http.Request)
 	Do(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) error
+	DoCtx(ctx context.Context, httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) error
 	DoReturnExtra(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) (
+		rawResp string,
+		statusCode int,
+		err error,
+	)
+	DoReturnExtraCtx(ctx context.Context, httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) (
 		rawResp string,
 		statusCode int,
 		err error,
@@ -45,20 +52,28 @@ func New(api, secret string) IRazorPayHttpClientHelper {
 }
 
 // resp is expecting a pointer
-func (r *razorPayHttpClientHelper) DoReturnExtra(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) (
+func (r *razorPayHttpClientHelper) DoReturnExtraCtx(ctx context.Context, httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) (
 	rawResp string,
 	statusCode int,
 	err error,
 ) {
-	res, err := r.doRequest(httpClient, api, urlParams, reqBody)
+	res, err := r.doRequest(ctx, httpClient, api, urlParams, reqBody)
 	if err != nil {
 		return rawResp, statusCode, err
 	}
 	rawResp, statusCode, err = ReadResponse(res, resp)
 	return rawResp, statusCode, err
 }
-func (r *razorPayHttpClientHelper) Do(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) error {
-	res, err := r.doRequest(httpClient, api, urlParams, reqBody)
+func (r *razorPayHttpClientHelper) DoReturnExtra(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) (
+	rawResp string,
+	statusCode int,
+	err error,
+) {
+	return r.DoReturnExtraCtx(context.Background(), httpClient, api, urlParams, reqBody, resp)
+}
+
+func (r *razorPayHttpClientHelper) DoCtx(ctx context.Context, httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) error {
+	res, err := r.doRequest(ctx, httpClient, api, urlParams, reqBody)
 	if err != nil {
 		return err
 	}
@@ -68,8 +83,11 @@ func (r *razorPayHttpClientHelper) Do(httpClient *http.Client, api API, urlParam
 	}
 	return nil
 }
+func (r *razorPayHttpClientHelper) Do(httpClient *http.Client, api API, urlParams []string, reqBody interface{}, resp interface{}) error {
+	return r.DoCtx(context.Background(), httpClient, api, urlParams, reqBody, resp)
+}
 
-func (r *razorPayHttpClientHelper) doRequest(httpClient *http.Client, api API, urlParams []string, reqBody interface{}) (*http.Response, error) {
+func (r *razorPayHttpClientHelper) doRequest(ctx context.Context, httpClient *http.Client, api API, urlParams []string, reqBody interface{}) (*http.Response, error) {
 	bArr, err := json.Marshal(reqBody)
 	if err != nil {
 		return nil, err
@@ -80,13 +98,14 @@ func (r *razorPayHttpClientHelper) doRequest(httpClient *http.Client, api API, u
 		Str("requestBody", string(bArr)).
 		Msg("send message")
 
-	httpReq, err := http.NewRequest(
+	httpReq, err := http.NewRequestWithContext(
+		ctx,
 		r.GetMethod(api),
 		r.GetPath(api, urlParams),
 		bytes.NewReader(bArr),
 	)
-	httpReq.Header.Set("User-Agent", "gzp-rzpay")
 	httpReq.Header.Set("Content-Type", "application/json")
+	httpReq.Header.Set("User-Agent", "gzp-rzpay")
 	r.AddAuth(httpReq)
 	if err != nil {
 		return nil, err

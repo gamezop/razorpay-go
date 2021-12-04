@@ -52,7 +52,7 @@ func (rzp *razorPayClient) CreateContact(ctx context.Context, contact r.RequestC
 	api := requestor.API_CONTACT_CREATE
 
 	var createdContact r.Contact
-	err = rzp.clientHelper.Do(rzp.httpClient, api, []string{}, contact, &createdContact)
+	err = rzp.clientHelper.DoCtx(ctx, rzp.httpClient, api, []string{}, contact, &createdContact)
 	return createdContact, err
 }
 
@@ -67,7 +67,7 @@ func (rzp *razorPayClient) CreateFundingAccountUPI(ctx context.Context, faUPI r.
 	api := requestor.API_FUNDING_ACCOUNT_CREATE
 
 	var createdFundingAccountUPI r.FundingAccountUPI
-	err = rzp.clientHelper.Do(rzp.httpClient, api, []string{}, faUPI, &createdFundingAccountUPI)
+	err = rzp.clientHelper.DoCtx(ctx, rzp.httpClient, api, []string{}, faUPI, &createdFundingAccountUPI)
 	return createdFundingAccountUPI, err
 }
 
@@ -82,7 +82,7 @@ func (rzp *razorPayClient) CreateFundingAccountBank(ctx context.Context, faBank 
 	api := requestor.API_FUNDING_ACCOUNT_CREATE
 
 	var createdFundingAccountBank r.FundingAccountBank
-	err = rzp.clientHelper.Do(rzp.httpClient, api, []string{}, faBank, &createdFundingAccountBank)
+	err = rzp.clientHelper.DoCtx(ctx, rzp.httpClient, api, []string{}, faBank, &createdFundingAccountBank)
 	return createdFundingAccountBank, err
 }
 
@@ -98,7 +98,7 @@ func (rzp *razorPayClient) Payout(ctx context.Context, faUPI r.RequestPayout) (
 	}
 	api := requestor.API_PAYOUT_CREATE
 
-	rawResponse, statusCode, err = rzp.clientHelper.DoReturnExtra(rzp.httpClient, api, []string{}, faUPI, &result)
+	rawResponse, statusCode, err = rzp.clientHelper.DoReturnExtraCtx(ctx, rzp.httpClient, api, []string{}, faUPI, &result)
 	return
 }
 
@@ -109,7 +109,7 @@ func (rzp *razorPayClient) GetPayout(ctx context.Context, payoutId string) (
 	err error,
 ) {
 	api := requestor.API_PAYOUT_GET
-	rawResponse, statusCode, err = rzp.clientHelper.DoReturnExtra(rzp.httpClient, api, []string{payoutId}, nil, &result)
+	rawResponse, statusCode, err = rzp.clientHelper.DoReturnExtraCtx(ctx, rzp.httpClient, api, []string{payoutId}, nil, &result)
 	return
 }
 
