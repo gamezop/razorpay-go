@@ -125,8 +125,10 @@ func (r *razorPayHttpClientHelper) GetMethod(api API) string {
 		return "POST"
 	case API_PAYOUT_GET:
 		return "GET"
+	case API_FUNDING_ACCOUNT_GET:
+		return "GET"
 	default:
-		panic(fmt.Sprintf("unknown path %s", api))
+		panic(fmt.Sprintf("unknown method %s", api))
 	}
 }
 
