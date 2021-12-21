@@ -15,6 +15,7 @@ type API string
 var (
 	API_CONTACT_CREATE         API = "API_CONTACT_CREATE"
 	API_FUNDING_ACCOUNT_CREATE API = "API_FUNDING_ACCOUNT_CREATE"
+	API_FUNDING_ACCOUNT_GET    API = "API_FUNDING_ACCOUNT_GET"
 	API_PAYOUT_CREATE          API = "API_PAYOUT_CREATE"
 	API_PAYOUT_GET             API = "API_PAYOUT_GET"
 )
@@ -145,6 +146,8 @@ func (r *razorPayHttpClientHelper) getPath(api API, urlParams []string) string {
 		return "/fund_accounts"
 	case API_PAYOUT_CREATE:
 		return "/payouts"
+	case API_FUNDING_ACCOUNT_GET:
+		return fmt.Sprintf("/fund_accounts/%s", urlParams[0])
 	case API_PAYOUT_GET:
 		return fmt.Sprintf("/payouts/%s", urlParams[0])
 	default:
