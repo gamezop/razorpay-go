@@ -1,5 +1,7 @@
 package resource
 
+import "encoding/json"
+
 type FundingAccountType string
 
 const (
@@ -93,4 +95,10 @@ func (f FundingAccountBank) GetIdentifierForAccount() string {
 
 func (f FundingAccountBank) GetMode() string {
 	return string(PAYOUT_MODE_IMPS)
+}
+
+type FundingAccount struct {
+	fundingAccountCommon
+	BankAccount json.RawMessage `json:"bank_account"`
+	Vpa         json.RawMessage `json:"vpa"`
 }

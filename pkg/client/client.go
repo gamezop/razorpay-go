@@ -31,6 +31,13 @@ type IRazorPayClient interface {
 		statusCode int,
 		err error,
 	)
+
+	GetFundingAccountById(ctx context.Context, fundingAccountId string) (
+		result r.FundingAccount,
+		rawResponse string,
+		statusCode int,
+		err error,
+	)
 }
 
 type razorPayClient struct {
@@ -110,6 +117,18 @@ func (rzp *razorPayClient) GetPayout(ctx context.Context, payoutId string) (
 ) {
 	api := requestor.API_PAYOUT_GET
 	rawResponse, statusCode, err = rzp.clientHelper.DoReturnExtraCtx(ctx, rzp.httpClient, api, []string{payoutId}, nil, &result)
+	return
+}
+
+func (rzp *razorPayClient) GetFundingAccountById(ctx context.Context, fundingAccountId string) (
+	result r.FundingAccount,
+	rawResponse string,
+	statusCode int,
+	err error,
+) {
+	api := requestor.API_FUNDING_ACCOUNT_GET
+
+	rawResponse, statusCode, err = rzp.clientHelper.DoReturnExtraCtx(ctx, rzp.httpClient, api, []string{fundingAccountId}, nil, &result)
 	return
 }
 
