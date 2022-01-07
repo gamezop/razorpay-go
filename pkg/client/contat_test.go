@@ -1,6 +1,8 @@
 package client
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestContactAPIs(t *testing.T) {
 
