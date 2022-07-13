@@ -38,6 +38,11 @@ type IRazorPayClient interface {
 		statusCode int,
 		err error,
 	)
+
+	IFSCLookUp(ctx context.Context, ifscCode string) (
+		result r.IFSCInfo,
+		err error,
+	)
 }
 
 type razorPayClient struct {
@@ -129,6 +134,16 @@ func (rzp *razorPayClient) GetFundingAccountById(ctx context.Context, fundingAcc
 	api := requestor.API_FUNDING_ACCOUNT_GET
 
 	rawResponse, statusCode, err = rzp.clientHelper.DoReturnExtraCtx(ctx, rzp.httpClient, api, []string{fundingAccountId}, nil, &result)
+	return
+}
+
+func (rzp *razorPayClient) IFSCLookUp(ctx context.Context, ifscCode string) (
+	result r.IFSCInfo,
+	err error,
+) {
+	api := requestor.API_IFSC_LOOKUP
+
+	err = rzp.clientHelper.DoCtx(ctx, rzp.httpClient, api, []string{ifscCode}, nil, &result)
 	return
 }
 

@@ -18,6 +18,7 @@ var (
 	API_FUNDING_ACCOUNT_GET    API = "API_FUNDING_ACCOUNT_GET"
 	API_PAYOUT_CREATE          API = "API_PAYOUT_CREATE"
 	API_PAYOUT_GET             API = "API_PAYOUT_GET"
+	API_IFSC_LOOKUP            API = "API_IFSC_LOOKUP"
 )
 
 // this can be generic sdk builder
@@ -127,20 +128,32 @@ func (r *razorPayHttpClientHelper) GetMethod(api API) string {
 		return "GET"
 	case API_FUNDING_ACCOUNT_GET:
 		return "GET"
+	case API_IFSC_LOOKUP:
+		return "GET"
 	default:
 		panic(fmt.Sprintf("unknown method %s", api))
 	}
 }
 
 const (
-	BASE_URL = "https://api.razorpay.com/v1"
+	BASE_URL      = "https://api.razorpay.com/v1"
+	IFSC_BASE_URL = "https://ifsc.razorpay.com"
 )
 
 func (r *razorPayHttpClientHelper) GetPath(api API, urlParams []string) string {
-	return fmt.Sprintf("%s%s", BASE_URL, r.getPath(api, urlParams))
+	return r.getPath(api, urlParams)
 }
 
 func (r *razorPayHttpClientHelper) getPath(api API, urlParams []string) string {
+	switch api {
+	case API_IFSC_LOOKUP:
+		return fmt.Sprintf("%s/%s", IFSC_BASE_URL, urlParams[0])
+	default:
+		return fmt.Sprintf("%s%s", BASE_URL, r.getDefaultPath(api, urlParams))
+	}
+}
+
+func (r *razorPayHttpClientHelper) getDefaultPath(api API, urlParams []string) string {
 	switch api {
 	case API_CONTACT_CREATE:
 		return "/contacts"
